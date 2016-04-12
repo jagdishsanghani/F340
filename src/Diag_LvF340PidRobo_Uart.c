@@ -84,8 +84,8 @@ void UART0_Init (void)
   * @param  None
   * @retval None
   */
-INTERRUPT(UART0_Interrupt, UART0_IRQn)
-//void UART0_Interrupt (void) interrupt 4
+
+void UART0_Interrupt (void) interrupt 4
 {
    if (RI0 == 1)                /* Check if receive flag is set */
    {

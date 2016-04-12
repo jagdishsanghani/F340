@@ -181,7 +181,7 @@ void Timer2_Init(void)
   * @retval None
   * @note   This routine changes the state of the LED whenever Timer2 overflows.
   */
-INTERRUPT(Timer2_ISR, TIMER2_IRQn)
+void Timer2_ISR (void) interrupt 5
 {
   if(HeartBeatTimer)
   {
@@ -301,7 +301,7 @@ Description: P3.5-SBASE (using timer T3 interrupt, 0.1msec Timer3Tick), BASE_SMO
 
 *****************************************************************************************
 */
-INTERRUPT(Timer3_ISR, TIMER3_IRQn)
+void Timer3_ISR (void) interrupt 14
 {
   if(base_motor_pwm_start)            /* start PWM signal ? */
   {

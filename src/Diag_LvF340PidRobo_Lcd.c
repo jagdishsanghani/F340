@@ -244,10 +244,12 @@ void lcd_init(void)
    /* configure pcf2119 as 2x16 display and display is off */	
 	SMbusWrite(PCF2119_ID, NULL, Pcf2119Reg,sizeof(Pcf2119Reg));
 
-  /* configure as to recive display data */ 
+  /* configure as to receive display data */
 	SMbusWrite(PCF2119_ID, NULL, LcdConfigForTop, sizeof(LcdConfigForTop));
 
-  /* clear display, fill top line with spaces */ 
+//	erase_lcd_buffer();
+
+	/* clear display, fill top line with spaces */
 	SMbusWrite(PCF2119_ID, NULL, FillDdramWithSpaces, sizeof(FillDdramWithSpaces));
 
 	SMbusWrite(PCF2119_ID, NULL, LcdConfigForBottom, sizeof(LcdConfigForBottom));
@@ -261,7 +263,7 @@ void lcd_init(void)
 }
 
 /**
-  * @brief  Convert interger to ascii for 'R' ROM compatible character.
+  * @brief  Convert integer to ascii for 'R' ROM compatible character.
   *         Result is place in result[] buffer.
   * @param  None
   * @retval None
@@ -289,97 +291,6 @@ void integer_to_ascii(int u_val, uchar *result)
     div_val /= base;            /* 10,000 / 10 = 1000  */
 
   } while (div_val);
-}
-
-/**
-  * @brief  This function displays the sensor readings on bootom row using bar graphs.
-  * @param1  unsigned int *ir_sensors_values
-  * @param2  uchar   ulX is the horizontal position to display the string, specified
-  *                  in columns from the left edge of the display.
-  * @param3  uchar   ulY is the vertical position to display the string, specified in
-  *                  eight scan line blocks from the top of the display (that is,
-  *                  only 0 and 1  are valid).
-  * @param4  bit     EraseBuffer
-  * @retval
-  */
-void display_sensor_readings_in_bars(const unsigned int *ir_sensors_values, uchar ucX, uchar ucY, bit EraseBuffer)
-{
-  // Initialize the array of characters that we will use for the graph. Using the space, an extra copy of
-  // the one-bar character,we get 10 characters in the array.
-
-                          /*   0     1     2     3     4     5     6     7     8     9  */
-                          /*  blank 1bar  2bar  3bar  3bar  4bar  4bar  5bar  6bar  7bar  */
-  const char code bars[10] = {0x91, 0x5A, 0x5B, 0x5C, 0x5C, 0x5D, 0x5D, 0x5F, 0x13, 0x13};
-
-  unsigned int sensors[5];
-  unsigned char i, ucXpos;
-
-
-  if(ucY == 0)
-  {
-    if(EraseBuffer)
-    {
-      for( i = 0; i < LCD_BUF_SIZE; i++)
-      {
-        lcd_display_image_top[i] = 0xA0;  /* fill with space */
-      }
-    }
-
-    for(i=0; i<5; i++)
-    {
-      sensors[i] =  *ir_sensors_values++; /* copy sensors values into local buffer */
-    }
-
-    // Move the display cursor to the requested position on the display.
-    ucXpos = ucX + 1; /* get char position including plus 1 for Control Byte */
-
-    for(i=0;i<5;i++)
-    {
-      // The variable c will have values from 0 to 9, since calibrated values are in the range
-      //  of 0 to 1000, and 1000/101 is 9 with integer math.
-      lcd_display_image_top[ucXpos++] =  bars[sensors[i]/101]; /* top line at position 5 */
-
-    }
-
-    lcd_display_image_top[0] = SEL_DATA_REG;  /* put control byte in 1st location */
-
-    /* send it to lcd display */
-    SMbusWrite(PCF2119_ID, NULL, LcdConfigForTop, sizeof(LcdConfigForTop));
-    SMbusWrite(PCF2119_ID, NULL, lcd_display_image_top, sizeof(lcd_display_image_top));
-  }
-
-  else
-  {
-    if(EraseBuffer)
-    {
-      for( i = 0; i < LCD_BUF_SIZE; i++)
-      {
-        lcd_display_image_bottom[i] = 0xA0;  /* fill with space */
-      }
-    }
-
-    for(i=0; i<5; i++)
-    {
-      sensors[i] =  *ir_sensors_values++; /* copy sensors values into local buffer */
-    }
-
-    // Move the display cursor to the requested position on the display.
-    ucXpos = ucX + 1; /* get char position including plus 1 for Control Byte */
-
-    for(i=0;i<5;i++)
-    {
-      // The variable c will have values from 0 to 9, since calibrated values are in the range
-      //  of 0 to 1000, and 1000/101 is 9 with integer math.
-      lcd_display_image_bottom[ucXpos++] =  bars[sensors[i]/101]; /* top line at position 5 */
-
-    }
-
-    lcd_display_image_bottom[0] = SEL_DATA_REG;  /* put control byte in 1st location */
-
-    /* send it to lcd display */
-    SMbusWrite(PCF2119_ID, NULL, LcdConfigForBottom, sizeof(LcdConfigForBottom));
-    SMbusWrite(PCF2119_ID, NULL, lcd_display_image_bottom, sizeof(lcd_display_image_bottom));
-  }
 }
 
 /******************************************************************************

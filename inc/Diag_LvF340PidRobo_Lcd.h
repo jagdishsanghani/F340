@@ -37,8 +37,6 @@ void  lcd_init(void);
 uchar lcd_test(void);
 
 void erase_lcd_buffer(void);
-void display_sensor_readings_in_bars(const unsigned int *ir_sensors_values, uchar ucX, uchar ucY, bit EraseBuffer);
-
 void  print_string (const schar *pcStr, uchar ucX, uchar ucY, bit EraseBuffer);
 void  print_integer (int val, uchar ucX, uchar ucY, bit EraseBuffer);
 

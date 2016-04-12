@@ -24,14 +24,14 @@
 /* Private define ------------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private constant-----------------------------------------------------------*/
-/*** 24LC1025 Eeprom ***/
-char code * code Eep24LC1025Menu[7]={"24LC1025 Eeprom Test\r\n",
-    "1. Display Eeprom contents\n\r",
-    "2. Write Eeprom\n\r",
-    "3. Write incremental Value to Eeprom\n\r",
-    "4. Erase Eeprom Chip\n\r",
-    "Select option (1-4)",
-        "\x1b[24;10HPress ESCAPE to exit\x1b[6;20H",
+/*** 24LC1025 EEprom ***/
+char code * code Eep24LC1025Menu[7]={"\t\t24LC1025 EEprom Test\r\n",
+    "  1. Display EEprom contents\n\r",
+    "  2. Write EEprom\n\r",
+    "  3. Write incremental Value to EEprom\n\r",
+    "  4. Erase EEprom Chip\n\r",
+    "\tSelect option (1-4)",
+    "\x1b[24;10HPress ESCAPE to exit\x1b[6;28H",
 };
 
 /* Variables for SMbus -------------------------------------------------------*/
@@ -177,7 +177,7 @@ uchar Read24LC1025Eeprom(void)
   {
     ClrScrRstCur();                    /* clear VDU screen */
 
-//    printf("%s",SMbusPeripheralsMenu[1]);	/* ShowChoice Display eeprom locations */
+//    printf("%s",Eep24LC1025Menu[1]);	/* ShowChoice Display eeprom locations */
 
     digit = MAX_DIGIT;                 /* maximum 4 characters */
 
@@ -186,8 +186,8 @@ uchar Read24LC1025Eeprom(void)
     StartAddress = MemStartAddress;    /* transfer start address */
     EndAddress = MemEndAddress;        /* transfer end address */
 
-    putchar('\n');                     /* start a new line CR\LF */
-    putchar('\n');                     /* start a new line CR\LF */
+    CarrRtnLineFeed();                    /* start a new line CR\LF */
+    CarrRtnLineFeed();                     /* start a new line CR\LF */
 
     printf("%x04  ",StartAddress);
     printf("%x04  ",EndAddress);
@@ -200,9 +200,8 @@ uchar Read24LC1025Eeprom(void)
     /* ram1a */
     count = 0;                         /* clear byte count */
     line = 0;                          /* clear line count */
-    putchar('\n');                     /* start a new line CR\LF */
+    putchar('\r');                     /* start a new line CR\LF */
     putchar('\n');                     /* again CR\LF */
-
 
     SMbusRead(EEP24LC1025_ID, EepBufferRead, StartAddress, 0x7F);
 
@@ -212,10 +211,10 @@ uchar Read24LC1025Eeprom(void)
       if(StartAddress == EndAddress)   /* chech for finished */		
       {
         ReadData = EepBufferRead[idx];  /* read and display last  byte */
-        printf("%x02  ", ReadData);
+        printf("%x02  ",(uint16) ReadData);
 
-        putchar('\n');                 /* 2 more CR\LF for message */
-        putchar('\n');
+        CarrRtnLineFeed();                 /* 2 more CR\LF for message */
+        CarrRtnLineFeed();
 
         printf("%s", AskExit);         /* ask for key press or escape */
         getche();
@@ -224,7 +223,6 @@ uchar Read24LC1025Eeprom(void)
         {/* ram1c */
           return(0);                   /* exit to menu */
         }
-
         break;	                       /* go to ram1 */ /* no so run test again */
       }
 
@@ -237,7 +235,7 @@ uchar Read24LC1025Eeprom(void)
       /* ram1e */
       ReadData = EepBufferRead[idx++];  /* read a byte */
       StartAddress++;                  /* increment address pointer */		
-      printf("%x02  ", ReadData);      /* print byte and value 2 spaces */
+      printf("%x02  ", (uint16) ReadData);      /* print byte and value 2 spaces */
 
       count++;                         /* increment byte counter */
 
@@ -253,8 +251,9 @@ uchar Read24LC1025Eeprom(void)
       {
         line = 0;                      /* yes zero line counter */
         Finish = 0;                    /* clear flag Finish */		
-        putchar('\n');                 /* 2 more CR\LF for message */
-        putchar('\n');
+
+        CarrRtnLineFeed();                 /* 2 more CR\LF for message */
+        CarrRtnLineFeed();
 
         if(StartAddress == EndAddress)
         {
@@ -287,7 +286,7 @@ uchar Read24LC1025Eeprom(void)
         }
       }
 
-      putchar('\n');                   /* if not finished then do some more */
+      CarrRtnLineFeed();               /* if not finished then do some more */
                                        /* start a new line */
       continue;                        /* ram1b  show some more */
     }
@@ -304,14 +303,15 @@ void FillBuffer(uchar PageNumber)
 {
 uchar idx;     /* index for buffer address */
 uchar zdx;     /* incremental number */
-
-  /* fill buffer incremetally */
-  for (idx=0,zdx=0; idx<=128; idx++)
+/* fill buffer incrementally */
+  for (idx=0,zdx=0; idx<128; idx++)
   {
-    EepBufferRead[idx++] = zdx++;    /* write incremental number and increment address */
-    EepBufferRead[idx] = PageNumber; /* write page number */
+//   EepBufferRead[idx++] = zdx++;    /* write incremental number and increment address */
+//   EepBufferRead[idx] = PageNumber; /* write page number */
 
+    EepBufferWrite[idx] = zdx++;    /* write incremental number and increment address */
   }
+  EepBufferRead[128] = 0xFF;
 }
 
 /**

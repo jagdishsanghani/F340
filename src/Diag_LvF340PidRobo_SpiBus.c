@@ -212,7 +212,7 @@ void SpioInit(void)
   *  Note:       :This routine is tested for only EEPROM 25lc1024.
   *****************************************************************************
   */
-INTERRUPT(SPI0_ISR, SPI0_IRQn)
+void SPI_ISR (void) interrupt 6
 {
   static uchar SpiState = 0;
 

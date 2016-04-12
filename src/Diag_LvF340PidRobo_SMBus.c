@@ -121,7 +121,7 @@ void InitSMBus (void)
   *  - All outgoing data is read from the global pointer <pSMB_DATA_OUT>
   *****************************************************************************
   */
-INTERRUPT(SMBUS0_ISR, SMBUS0_IRQn)
+void SMBus_ISR (void) interrupt 7
 {
    bit FAIL = 0;   /* Used by the ISR to flag failed transfers */
    static char i;  /* Used by the ISR to count the number of data bytes sent or received */
@@ -149,17 +149,25 @@ INTERRUPT(SMBUS0_ISR, SMBUS0_IRQn)
             break;
           }
               
-			    if(SMB_SENDWORDADDR)           /* Are we sending the word address? */
+          /* Are we sending the 16bit word address? */
+          if(SMB_SENDWORDADDR)
           {
-            SMB0DAT = WORD_ADDR & 0xFF;  /* Send LOW BYTE address ONLY */
-            SMB_SENDWORDADDR = 0;        /* Clear flag */
-
-            if (SMB_RANDOMREAD)          /* this bit is set in ReadSMbus() function */
+            if(SMB_EEPROM)                 /* send HIGH BYTE first */
             {
-              SEND_START = 1;            /* Send a START after the next ACK cycle */
-              SMB_RW = READ;
+              SMB0DAT = WORD_ADDR >> 8;    /* load byte high address */
+              SMB_EEPROM = 0;              /* reset high byte flag */
             }
+            else
+            {
+              SMB0DAT = WORD_ADDR & 0xFF;  /* Send LOW BYTE address ONLY */
+              SMB_SENDWORDADDR = 0;        /* Clear flag, No more address */
 
+              if (SMB_RANDOMREAD)          /* this bit is set in ReadSMbus() function */
+              {
+                SEND_START = 1;            /* Send a START after the next ACK cycle */
+                SMB_RW = READ;
+              }
+            }
             break;
           }/** end of SMB_SENDWORDADDR **/
 
@@ -177,10 +185,11 @@ INTERRUPT(SMBUS0_ISR, SMBUS0_IRQn)
               SMB_BUSY = 0; /* Clear software busy flag */
             }
           }
-          else {}           /* If this transfer is a READ, then take no action. */
-                            /* Slave address was transmitted. A separate 'case' */
-                            /* is defined for data byte recieved. */
-        }
+          else {/* do nothing */}       /* If this transfer is a READ, then take no action. */
+                                        /* Slave address was transmitted. A separate 'case' */
+                                        /* is defined for data byte recieved. */
+        } /* end of ACK */
+
         else                /* If slave NACK, */
         {
           if(SMB_ACKPOLL)
@@ -189,7 +198,7 @@ INTERRUPT(SMBUS0_ISR, SMBUS0_IRQn)
           }
           else
           {
-            FAIL = 1;    /* Indicate failed transfer and handle at end of ISR */
+            FAIL = 1;      /* Indicate failed transfer and handle at end of ISR */
           }
         }
         break;
@@ -308,8 +317,12 @@ void SMbusRead(uchar SMBusDeviceID, uchar* DestAddr, uint16 SrcAddr, uchar Len)
 
    SMB_RW = WRITE;             /* after the repeated start is sent. The ISR handles this */
                                /* switch over if the <SMB_RANDOMREAD> bit is set. */
+   if(TARGET == PCF2119_ID)      /* PCF2119 LCD Display Driver ? */
+   {
+     SMB_SENDWORDADDR = 0;       /* do not send any address after Slave Address */
+   }
 
-   if(TARGET == DS1338_ID)     /* DS1338 Real Time Clock ? */
+   else if(TARGET == DS1338_ID)     /* DS1338 Real Time Clock ? */
    {
      SMB_SENDWORDADDR = 1;     /* Send Byte Address after Slave Address */
    }

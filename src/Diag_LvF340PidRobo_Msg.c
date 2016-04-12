@@ -27,9 +27,9 @@ char code * code PressBarEscape = "\x1b[24;10H Press SpaceBar to continue or ESC
 
 char code * code AskExit = "\x1b[24;10H Press ESCAPE to exit or any key to run test again";
 char code * code AskMore = "\x1b[24;10H Press ESCAPE to run test again or any key for more";
-const char * ProgUndDev= "\x1b[10;10H Program under development";
+char code * code ProgUndDev = "\x1b[10;10H Program under development";
 
-char code * code MainMenu[17] = {"\t\t LvF340PID_Robo board  \n\r",
+char code * code MainMenu[18] = {"\t\t LvF340PID_Robo board  \n\r",
 		"Diagnostic Software Ver 1.0  10-March-2016  J S\n\n\r",
 		"\t\tMain Menu\n\r",
 		"  1.  LEDs Test\n\r",
@@ -44,9 +44,10 @@ char code * code MainMenu[17] = {"\t\t LvF340PID_Robo board  \n\r",
 		" 10.  Rtc Test\n\r",
 		" 11.  FanDCmotor Test\n\r",
 		" 12.  ServoMotors Test\n\r",
-		" 13.  LCD Test\n\r\n",
+		" 13.  LCD Test\n\r",
+    " 14.  EEprom Test\n\r\n",
 
-		"\tSelect option (1-13) and press ENTER  "
+		"\tSelect option (1-14) and press ENTER  "
 };
 
 /* Private variables ---------------------------------------------------------*/
@@ -63,7 +64,7 @@ void PrintMainMenu(void)
   uchar count;
 
   ClrScrRstCur();
-  for( count = 0; count<17; ++count)
+  for( count = 0; count<18; ++count)
   {
     printf(MainMenu[count]);
   }

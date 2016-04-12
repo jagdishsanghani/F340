@@ -284,9 +284,7 @@ void InitPca0 (void)
   *          value held in the global variables "CEX4_FAN_Compare_Value. ".
   *****************************************************************************
   */
-INTERRUPT(PCA0_ISR, PCA0_IRQn)
-
-//void PCA0_ISR (void) interrupt 11
+void PCA0_ISR (void) interrupt 11
 {
 
    if (CCF0)                           // If Module 0 caused the interrupt

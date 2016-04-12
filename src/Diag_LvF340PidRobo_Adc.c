@@ -89,8 +89,7 @@ void InitADC0 (void)
   * @param  None
   * @retval None
   */
-INTERRUPT(ADC0_ISR, ADC0EOC_IRQn)
-//void ADC0_ISR (void) interrupt 10
+void ADC0_ISR (void) interrupt 10
 {
   AD0INT = 0;       /* Clear ADC0 conv. complete flag */
   AdcValue = ADC0;  /* Read adc value */
